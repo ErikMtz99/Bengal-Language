@@ -18,13 +18,12 @@ reserved = {
     'go' : 'GO',
     'input' : 'INPUT',
     'output' : 'OUTPUT',
-    'word' : 'WORD',
-    'float' : 'FLOAT',
-    'sub procedure' : 'SUB PROCEDURE',
+    'sub procedure' : 'SUBPROCEDURE',
     'return' : 'RETURN',
     'and' : 'AND',
     'or' : 'OR',
     'not' : 'NOT',
+    '#' : 'WHERE'
         
  }
 
@@ -33,7 +32,6 @@ tokens = [      #Todos los tokens que se vayan a usar
     'CTE',
     'WORD',
     'FLOAT',
-    '#',
 
     
     'SUMA',
@@ -43,7 +41,7 @@ tokens = [      #Todos los tokens que se vayan a usar
     'IZQPAR',
     'DERPAR',
     'IZQCORCH',
-    'DERCHORCH',
+    'DERCORCH',
     'LINK',
     'COMA',
     'COMMENT'
