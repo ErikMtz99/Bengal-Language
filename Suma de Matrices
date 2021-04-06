@@ -1,0 +1,68 @@
+start
+
+dim bandera is float;
+dim f1,c1,f2,c2 is float;
+dim i,j is float;
+dim Mat1[5][5] is float;
+dim Mat2[5][5] is float;
+dim sumMat[5][5] is float;
+
+sub procedure matrices
+bandera <= 0;
+when bandera == 0 do
+output (Ingresa num filas de matriz 1 max 5);	
+input f1;
+output (Ingresa num columnas de matriz 1 max 5);
+input c1;
+
+output (Ingresa num filas de matriz 2 max 5);	
+input f2;
+output (Ingresa num columnas de matriz 2 max 5);
+input c2;
+
+if (f1 != f2) or (c1 != c2) then
+output (Ingrese 2 matrices con las mismas dimensiones);
+bandera <= 0;
+else bandera <= 1;
+end;
+end;
+return;
+
+sub procedure Matriz1
+for i<=0 to f1 do
+for j<=0 to c1 do
+output (Ingrese elemento de la matriz 1);
+input Mat1[i][j];
+end;
+end;
+return;
+
+sub procedure Matriz2
+for i<=0 to f2 do
+for j<=0 to c2 do
+output (Ingrese elemento de la matriz 2);
+input Mat1[i][j];
+end;
+end;
+return;
+
+sub procedure suma
+for i<=0 to f1 do
+for j<=0 to c1 do
+sumMat[i][j] <= Mat1[i][j] + Mat2[i][j];
+output (La matriz resultante es );
+output sumMat;
+end;
+end;
+return;
+
+
+output (Suma de matrices);
+
+gosub matrices; 		
+gosub Matriz1; 			
+gosub Matriz2; 			
+
+gosub suma;
+
+end
