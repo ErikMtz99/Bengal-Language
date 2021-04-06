@@ -18,7 +18,8 @@ reserved = {
     'go' : 'GO',
     'input' : 'INPUT',
     'output' : 'OUTPUT',
-    'sub procedure' : 'SUBPROCEDURE',
+    'sub' : 'SUB',
+    'procedure' : 'PROCEDURE',
     'return' : 'RETURN',
     'and' : 'AND',
     'or' : 'OR',
@@ -32,10 +33,7 @@ reserved = {
 tokens = [      #Todos los tokens que se vayan a usar
     'ID',
     'CTE',
-#    'WORD',
-#    'FLOAT',
 
-    
     'SUMA',
     'RESTA',
     'MULT',
@@ -49,11 +47,13 @@ tokens = [      #Todos los tokens que se vayan a usar
     'COMMENT',
     
     'EQUAL',
-    'NOTEQUAL'
+    'NOTEQUAL',
+    'MAYOR',
+    'MENOR'
         
 ] + list(reserved.values())
 
-literals = "+-/*()[],!;:^<>.|" 
+literals = "+-/*()[]=,!;:^<>.|#" 
 
 #Ignoramos los espacios
 t_ignore = r' '  
@@ -67,16 +67,11 @@ def t_CTE(t):
         r'\d+'
         t.value = int(t.value)    
         return t 
-    
-#def t_WORD(t):
-#    r'\"[a-z A-Z_\d]+\"'
-#    t.value = str(t.value)
-#    return t    
 
-#def t_FLOAT(t):
-#        r'\d+\.\d+'
-#        t.value = float(t.value)    
-#        return t 
+def t_COMA(t):
+        r'\,'
+        t.type = 'COMA'    
+        return t 
     
  #Expresiones Regulares para tokens simples
 t_SUMA    = r'\+'
@@ -88,16 +83,20 @@ t_DERPAR  = r'\)'
 t_IZQCORCH  = r'\['
 t_DERCORCH  = r'\]'
 t_LINK = r'\<\='   
-t_COMA = r'\,'
+
 
 t_EQUAL = r'\=\='
 t_NOTEQUAL = r'\!\='
- 
+t_MAYOR = r'\>'
+t_MENOR = r'\<'
+
 #Comentarios (//) 
-def t_COMMENT(t): 
-    r'\/\/.*'
+def t_COMMENT(t):
+    r'\%.*'
     pass
-    
+    # No return value. Token discarded
+  
+ 
 # Define a rule so we can track line numbers
 def t_newline(t):
         r'\n+'
@@ -107,94 +106,144 @@ def t_newline(t):
 def t_error(t):
     print("Illegal characters!")
     t.lexer.skip(1)
-
+    
+def testLexer():
+    lexer.input(testProgram)
+    for tok in lexer:
+        print(tok)
+        
 # Se crea el lexer 
 lexer = lex.lex()
 
 ##################################################
 
+####Definición del programa principal
 def p_programa(p):
 	'''
 	programa : START variables procedures main END 
 	'''
 	print("\tCORRECTO")
 
+####Definición de variables
 def p_variables(p):
 	'''
-	variables : DIM A
+	variables : A
               | 
-              
-    A : A B C IS tipo ';'
-      | B C IS tipo ';'
-      
+	'''
+def p_A(p):
+    '''
+    A : A DIM B C IS tipo ';'
+      | DIM B C IS tipo ';'
+    '''   
+def p_B(p):
+    '''
     B : ID COMA B
       | ID
-    
-    C : IZQCORCH D DERCORCH
+    '''     
+def p_C(p):
+    '''
+    C : IZQCORCH CTE DERCORCH
+      | IZQCORCH CTE DERCORCH IZQCORCH CTE DERCORCH
       |
-    
-    D : CTE COMA D
-      | CTE
-      
+    '''  
+def p_tipo(p):
+    '''
     tipo : WORD
          | FLOAT
-	'''
+    '''        
     
+#### Definición de procedures (procedures)
 def p_procedures(p):
     '''
-	procedures : SUBPROCEDURE ID main RETURN ';' procedures
+	procedures : SUB PROCEDURE ID main RETURN ';' procedures
                |
 	'''
+
+#Definición del bloque de estatutos (main)
 def p_main(p):
     '''
 	main : E
-    
+	'''  
+def p_E(p):
+    '''
     E : E F S ';'
       | F S ';'
+    ''' 
     
+def p_F(p):
+    '''
     F : WHERE ID ':'
       |
-	'''  
-
+    '''     
+    
+#Definición de Estatutos (S)
 def p_S(p):
     '''
-	S : var LINK EA COMMENT
-      | INPUT var
-      | OUTPUT WORD
+	S : var LINK EA 
+      | INPUT var 
+      | OUTPUT IZQPAR K DERPAR
+      | OUTPUT var
       | IF EL THEN G ELSE G END
       | WHEN EL DO G END
       | DO G WHEN EL END
       | FOR ID LINK EA TO EA DO G END
-      | GO WHERE ID
+      | GO '#' ID
       | GOSUB ID
       | EA
       |
+	''' 
+def p_G(p):
+    '''
+    G : G S ';'
+      | S ';'
+    ''' 
+def p_K(p):
+    '''
+    K : K ID
+      | K CTE
+      | CTE
+      | ID
+    '''     
+def p_var(p):
+    '''
+    var : ID 
+        | ID IZQCORCH EA DERCORCH
+        | ID IZQCORCH EA DERCORCH IZQCORCH EA DERCORCH
+    ''' 
+# =============================================================================
+# def p_J(p):
+#     '''
+#     J : J COMA EA
+#       | EA    
+#     '''  
+# =============================================================================
     
-    G : G S
-      | S
-     
-    var : ID
-        | ID IZQCORCH J DERCORCH 
-
-    J : EA COMA J
-    J : EA
-	'''  
-    
+#Expresiones Aritmeticas    
 def p_EA(p):
     '''
 	EA : EA SUMA TA
        | EA RESTA TA
        | TA
-       
+	''' 
+def p_TA(p):
+    '''
     TA : TA MULT FA
        | TA DIV FA
-       | FA
+       | FA        
+    '''  
+def p_FA(p):
+    '''
+    FA : var
+       | CTE
+       | IZQPAR EA DERPAR      
+    '''    
     
-    FA : CTE
-       | ID
-       | IZQPAR EA DERPAR
-    
-	'''  
+    #if p[2] == '+' : p[0] = p[1] + p[3]
+    #elif p[2] == '-' : p[0] = p[1] - p[3]
+    #elif p[2] == '*' : p[0] = p[1] * p[3]
+    #elif p[2] == '/' : p[0] = p[1] / p[3]
+
+#Expresiones Logicas      
 def p_EL(p):
     '''
 	EL : EL OR TL
@@ -204,13 +253,13 @@ def p_EL(p):
     TL : TL NOT FL
        | FL
     
-    FL : H '>' H
-       | H '<' H
+    FL : H MAYOR H
+       | H MENOR H
        | H EQUAL H
        | H NOTEQUAL H
        | IZQPAR EL DERPAR
     
-    H : ID
+    H : var
       | CTE
 	'''  
     
@@ -220,9 +269,22 @@ def p_error(p):
 # Se crea el parser 
 parser = yacc.yacc()
 
+#while True:
+# 	try:
+# 		s = input('')
+# 	except EOFError:
+# 		break
+# 	parser.parse(s)
+    
+print("Enter/Paste your content. Ctrl-D or Ctrl-Z ( windows ) to save it.")
 while True:
-	try:
-		s = input('')
-	except EOFError:
-		break
-	parser.parse(s)
+    string = ''
+    espacio = ' '
+    line = input('')
+    while line != '':
+        string += line
+        string += espacio #El error era que despues de la palabra start no habia espacio. Se solucionó con esto.
+        line = input('')
+
+    parser.parse(string)
+
