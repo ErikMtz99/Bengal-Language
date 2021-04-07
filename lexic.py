@@ -259,7 +259,7 @@ def p_EL(p):
        | H NOTEQUAL H
        | IZQPAR EL DERPAR
     
-    H : var
+    H : ID
       | CTE
 	'''  
     
