@@ -2,6 +2,8 @@ from bengalLex import *
 import ply.yacc as yacc
 import sys
 
+tabla_simbolos = {}
+
 ####Definición del programa principal
 def p_programa(p):
 	'''
@@ -11,33 +13,40 @@ def p_programa(p):
 
 ####Definición de variables
 def p_variables(p):
-	'''
-	variables : A
-              | COMMENT
+    '''     
+    variables : A
               |
-	'''
-def p_A(p):
-    '''
+
     A : A DIM B C IS tipo ';'
       | DIM B C IS tipo ';'
-    '''   
-def p_B(p):
-    '''
+      
     B : ID COMA B
       | ID
-    '''     
-def p_C(p):
-    '''
+      
     C : IZQCORCH CTE DERCORCH
       | IZQCORCH CTE DERCORCH IZQCORCH CTE DERCORCH
       |
-    '''  
-def p_tipo(p):
-    '''
-    tipo : WORD
-         | FLOAT
-    '''        
+
+tipo : WORD
+     | FLOAT
+     
+    ''' 
+    global tipo_var
+    global nombre_var
     
+    for t in p:
+        if t != ',' and t != None:
+           if (t == "float" or t == "word"):
+              tipo_var = t
+           elif (t != "is" and t != "dim" ):
+               nombre_var = t
+           else:
+               if len(nombre_var) > 0:
+                   left_text = nombre_var.partition("[")[0]
+                   tabla_simbolos.update({left_text : tipo_var})
+
+                   
+                      
 #### Definición de procedures (procedures)
 def p_procedures(p):
     '''
@@ -50,11 +59,13 @@ def p_main(p):
     '''
 	main : E
 	'''  
+    
 def p_E(p):
     '''
     E : E F S ';'
       | F S ';'
     ''' 
+
     
 def p_F(p):
     '''
@@ -148,14 +159,20 @@ def p_error(p):
 # Se crea el parser 
 parser = yacc.yacc()
 
+
 try:
-    f = open("matricesEntrega_A01244818.txt", "r")
+    f = open("prueba_variables2.txt", "r")
+    #f = open("matricesEntrega_A01244818.txt", "r")
     #f = open("arit_logic_ProgramaPrueba.txt", "r")
     contenido = f.read()
     parser.parse(contenido)
+
+
 except EOFError:
     PASS
-    
+     
+for x, y in tabla_simbolos.items():
+    print(x, y)    
 #while True:
 # 	try:
 # 		s = input('')
