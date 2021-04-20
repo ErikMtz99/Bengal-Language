@@ -3,7 +3,8 @@ import ply.yacc as yacc
 import sys
 
 tabla_simbolos = {}
-
+nombre_var = []
+tipo_var = ""
 ####Definición del programa principal
 def p_programa(p):
 	'''
@@ -16,37 +17,49 @@ def p_variables(p):
     '''     
     variables : A
               |
-
+    '''
+def p_A(p):
+    '''    
     A : A DIM B C IS tipo ';'
       | DIM B C IS tipo ';'
-      
+    '''
+    global nombre_var
+    global tipo_var
+    
+    for t in p:
+        if t ==';':
+            for x in nombre_var:
+               tabla_simbolos.update({x : tipo_var})
+               nombre_var.clear()
+               tipo_var = ""
+            
+def p_B(p):   
+    '''
     B : ID COMA B
-      | ID
-      
+      | ID 
+    '''
+    global nombre_var 
+    left_text = p[1].partition("[")[0]
+    nombre_var.append(left_text)
+
+def p_C(p):  
+    '''
     C : IZQCORCH CTE DERCORCH
       | IZQCORCH CTE DERCORCH IZQCORCH CTE DERCORCH
       |
-
+    '''
+    
+def p_tipo(p):
+    '''
 tipo : WORD
      | FLOAT
      
     ''' 
     global tipo_var
-    global nombre_var
-    
-    for t in p:
-        if t != ',' and t != None:
-           if (t == "float" or t == "word"):
-              tipo_var = t
-           elif (t != "is" and t != "dim" ):
-               nombre_var = t
-           else:
-               if len(nombre_var) > 0:
-                   left_text = nombre_var.partition("[")[0]
-                   tabla_simbolos.update({left_text : tipo_var})
+    tipo_var = p[1]
 
-                   
-                      
+    
+                    
 #### Definición de procedures (procedures)
 def p_procedures(p):
     '''
