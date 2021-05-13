@@ -4,6 +4,22 @@ import sys
 
 #Para los stacks
 from collections import deque 
+
+#---------------------------- Funciones ------------------------------------
+def Avails(num):
+    a = []
+    for i in range(num) :
+        t = 'T'
+        t = t+str(i)
+        a.append(t)
+    return a     
+        
+def hacerLista(*elementos):
+    lista = []
+    for j in elementos:
+        lista.append(j)
+    return lista
+
 #----------------------------- VARIABLES ----------------------------------
 tabla_simbolos = {}
 nombre_var = []
@@ -12,20 +28,11 @@ variable = ""
 
 pila_operandos = []
 
-avail = []
-temp = ''
-for i in range(11):
-    t = 'T'
-    t = t+str(i)
-    avail.append(t)
-   
-cuadruplos = []
 
-def hacerLista(*elementos):
-    lista = []
-    for j in elementos:
-        lista.append(j)
-    return lista
+temp = ''
+avail = Avails(11)
+cuadruplos = []        #Lista de listas de cuadruplos
+
 #--------------------------------------------------------------------------
 
 ####Definición del programa principal
@@ -129,9 +136,9 @@ def p_S(p):
     if  p[2] == '<=':
         if len(pila_operandos) >= 1:
             operando1 = pila_operandos.pop()
-            list = hacerLista('=', variable, operando1, "")
-            cuadruplos.append(list)
-            cuadruplos.extend(['=', variable, operando1, ""])
+            cuadr = hacerLista('=', variable, operando1)
+            cuadruplos.append(cuadr)
+ 
 
 def p_AUX1(p):
     '''     
@@ -180,7 +187,8 @@ def p_EA(p):
             if operando2 == temp:
                avail.insert(0, operando2)
             temp = avail.pop(0)
-            cuadruplos.extend([p[2], operando1, operando2, temp])
+            cuadr = hacerLista(p[2], operando1, operando2, temp)
+            cuadruplos.append(cuadr)
             pila_operandos.append(temp)
 def p_TA(p):
     '''
@@ -198,7 +206,8 @@ def p_TA(p):
             if operando2 == temp:
                avail.insert(0, operando2)
             temp = avail.pop(0)
-            cuadruplos.extend([p[2], operando1, operando2, temp])
+            cuadr = hacerLista(p[2], operando1, operando2, temp)
+            cuadruplos.append(cuadr)
             pila_operandos.append(temp)
     
 def p_FA(p):
@@ -236,7 +245,8 @@ def p_EL(p):
             if operando2 == temp:
                avail.insert(0, operando2)
             temp = avail.pop(0)
-            cuadruplos.extend([p[2], operando1, operando2, temp])
+            cuadr = hacerLista(p[2], operando1, operando2, temp)
+            cuadruplos.append(cuadr)
             pila_operandos.append(temp)
    
             
@@ -255,7 +265,8 @@ def p_TL(p):
             if operando2 == temp:
                avail.insert(0, operando2)
             temp = avail.pop(0)
-            cuadruplos.extend([p[2], operando1, operando2, temp])
+            cuadr = hacerLista(p[2], operando1, operando2, temp)
+            cuadruplos.append(cuadr)
             pila_operandos.append(temp)
     
 def p_FL(p):
@@ -276,7 +287,8 @@ def p_FL(p):
             if operando2 == temp:
                avail.insert(0, operando2)
             temp = avail.pop(0)
-            cuadruplos.extend([p[2], operando1, operando2, temp])
+            cuadr = hacerLista(p[2], operando1, operando2, temp)
+            cuadruplos.append(cuadr)
             pila_operandos.append(temp)
         
             
@@ -319,14 +331,19 @@ try:
 
 except EOFError:
     PASS
-#------------- PRINTS -----------------------
+#------------- PRINTS -----------------------------------
+
 print('---------Tabla de Símbolos------------')    
 print("\n".join("{}\t{}\t{}".format(i, k, v) for i, (k, v) in enumerate(tabla_simbolos.items())))
 
+print('\n--------Código Intermedio ----------')
+for s in cuadruplos:
+    print(*s)  #cuadruplos es una lista de listas. Con el * se itera en cada lista e imprime los valores de cada lista sin corchetes ni comas
 
-print('\n--------Código Intermedio----------')
-for i in range(0, len(cuadruplos), 4):
-    print(*cuadruplos[i:i+4], sep=' ') 
+    
+print('\n--------Cuadruplos (listas) ----------')
+for s in cuadruplos:
+    print(s)
     
 print('\n----------Pilas------------')    
 print(pila_operandos)
