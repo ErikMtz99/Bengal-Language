@@ -8,6 +8,7 @@ from collections import deque
 tabla_simbolos = {}
 nombre_var = []
 tipo_var = ""
+variable = ""
 
 pila_operandos = []
 
@@ -19,6 +20,12 @@ for i in range(11):
     avail.append(t)
    
 cuadruplos = []
+
+def hacerLista(*elementos):
+    lista = []
+    for j in elementos:
+        lista.append(j)
+    return lista
 #--------------------------------------------------------------------------
 
 ####Definición del programa principal
@@ -109,7 +116,7 @@ def p_S(p):
       | INPUT var 
       | OUTPUT IZQPAR K DERPAR
       | OUTPUT var
-      | IF EL THEN G ELSE G END
+      | IF EL THEN AUX1 G ELSE G END 
       | WHEN EL DO G END
       | DO G WHEN EL END
       | FOR ID LINK EA TO EA DO G END
@@ -118,6 +125,20 @@ def p_S(p):
       | EA
       |
     ''' 
+    global variable
+    if  p[2] == '<=':
+        if len(pila_operandos) >= 1:
+            operando1 = pila_operandos.pop()
+            list = hacerLista('=', variable, operando1, "")
+            cuadruplos.append(list)
+            cuadruplos.extend(['=', variable, operando1, ""])
+
+def p_AUX1(p):
+    '''     
+    AUX1 :
+    '''          
+
+            
 def p_G(p):
     '''
     G : G S ';'
@@ -136,6 +157,10 @@ def p_var(p):
         | ID IZQCORCH EA DERCORCH
         | ID IZQCORCH EA DERCORCH IZQCORCH EA DERCORCH
     ''' 
+    global variable
+    variable = p[1]
+
+     
     
 #Expresiones Aritmeticas    
 def p_EA(p):
@@ -187,8 +212,10 @@ def p_FA(p):
         if p[1] in tabla_simbolos.keys():
             pila_operandos.append(p[1])
         else:
-            if isinstance(p[1], int) != True:
-               print(str(p[1]) + ' no fue definido')
+            if isinstance(p[1], int) == True:
+                pila_operandos.append(p[1])      # Preguntar a maestra si debe ir asi
+            else:
+                sys.exit(str(p[1]) + ' no fue definido')     
 
       
         
@@ -263,8 +290,11 @@ def p_H(p):
         if p[1] in tabla_simbolos.keys():
             pila_operandos.append(p[1])
         else:
-            if isinstance(p[1], int) != True:
-               print(str(p[1]) + ' no fue definido')
+            if isinstance(p[1], int) == True:
+                pila_operandos.append(p[1])      # Preguntar a maestra si debe ir asi
+            else:
+                sys.exit(str(p[1]) + ' no fue definido') 
+
             
 def p_AUX(p):
     '''     
@@ -279,7 +309,7 @@ parser = yacc.yacc()
 
 
 try:
-    f = open("prueba_cuadruplos2.txt", "r")
+    f = open("prueba_cuadruplos.txt", "r")
     #f = open("prueba_variables.txt", "r")
     #f = open("matricesEntrega_A01244818.txt", "r")
     #f = open("arit_logic_ProgramaPrueba.txt", "r")
