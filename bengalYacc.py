@@ -4,7 +4,7 @@ import sys
 
 #Para los stacks
 from collections import deque 
-
+ 
 #---------------------------- Funciones ------------------------------------
 def Avails(num):
     a = []
@@ -18,7 +18,12 @@ def hacerLista(*elementos):
     lista = []
     for j in elementos:
         lista.append(j)
+    global cont
+    cont = cont + 1
     return lista
+
+def rellenar(direc, cont):
+    cuadruplos[direc].append(cont)
 
 #----------------------------- VARIABLES ----------------------------------
 tabla_simbolos = {}
@@ -27,7 +32,8 @@ tipo_var = ""
 variable = ""
 
 pila_operandos = []
-
+pila_saltos = []
+cont = 0
 
 temp = ''
 avail = Avails(11)
@@ -123,7 +129,7 @@ def p_S(p):
       | INPUT var 
       | OUTPUT IZQPAR K DERPAR
       | OUTPUT var
-      | IF EL THEN AUX1 G ELSE G END 
+      | IF EL THEN AUX1 G ELSE AUX2 G AUX3 END 
       | WHEN EL DO G END
       | DO G WHEN EL END
       | FOR ID LINK EA TO EA DO G END
@@ -144,8 +150,28 @@ def p_AUX1(p):
     '''     
     AUX1 :
     '''          
-
-            
+    te = pila_operandos.pop()
+    cuadr = hacerLista('gotoF', te)
+    cuadruplos.append(cuadr)
+    pila_saltos.append(cont - 1)
+    
+def p_AUX2(p):
+    '''     
+    AUX2 :
+    '''          
+    direc = pila_saltos.pop()
+    cuadr = hacerLista('goto')
+    cuadruplos.append(cuadr)
+    pila_saltos.append(cont - 1)
+    rellenar(direc, cont)     
+    
+def p_AUX3(p):
+    '''     
+    AUX3 :
+    '''          
+    direc = pila_saltos.pop()
+    rellenar(direc, cont)    
+       
 def p_G(p):
     '''
     G : G S ';'
@@ -321,7 +347,8 @@ parser = yacc.yacc()
 
 
 try:
-    f = open("prueba_cuadruplos.txt", "r")
+    f = open("ifprueba.txt", "r")
+    #f = open("prueba_cuadruplos2.txt", "r")
     #f = open("prueba_variables.txt", "r")
     #f = open("matricesEntrega_A01244818.txt", "r")
     #f = open("arit_logic_ProgramaPrueba.txt", "r")
@@ -346,6 +373,8 @@ for s in cuadruplos:
     print(s)
     
 print('\n----------Pilas------------')    
-print(pila_operandos)
-print(avail)
+print("Avails:", avail)
+print("pila operandos:", pila_operandos)
+print("pila saltos:", pila_saltos)
+print("Contador:", cont)
 #---------------------------------------------
