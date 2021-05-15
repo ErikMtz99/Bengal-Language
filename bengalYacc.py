@@ -41,7 +41,7 @@ cuadruplos = []        #Lista de listas de cuadruplos
 
 #--------------------------------------------------------------------------
 
-####Definición del programa principal
+#-----------------------Definición del programa principal-------------------
 def p_programa(p):
     '''
     programa : START variables procedures main END 
@@ -130,47 +130,20 @@ def p_S(p):
       | OUTPUT IZQPAR K DERPAR
       | OUTPUT var
       | IF EL THEN AUX1 G ELSE AUX2 G AUX3 END 
-      | WHEN EL DO G END
-      | DO G WHEN EL END
+      | WHEN AUX4 EL AUX5 DO G AUX6 END
+      | DO AUX4 G WHEN EL  AUX7 END
       | FOR ID LINK EA TO EA DO G END
       | GO '#' ID
       | GOSUB ID
       | EA
       |
-    ''' 
+    '''  
     global variable
     if  p[2] == '<=':
         if len(pila_operandos) >= 1:
             operando1 = pila_operandos.pop()
             cuadr = hacerLista('=', variable, operando1)
             cuadruplos.append(cuadr)
- 
-
-def p_AUX1(p):
-    '''     
-    AUX1 :
-    '''          
-    te = pila_operandos.pop()
-    cuadr = hacerLista('gotoF', te)
-    cuadruplos.append(cuadr)
-    pila_saltos.append(cont - 1)
-    
-def p_AUX2(p):
-    '''     
-    AUX2 :
-    '''          
-    direc = pila_saltos.pop()
-    cuadr = hacerLista('goto')
-    cuadruplos.append(cuadr)
-    pila_saltos.append(cont - 1)
-    rellenar(direc, cont)     
-    
-def p_AUX3(p):
-    '''     
-    AUX3 :
-    '''          
-    direc = pila_saltos.pop()
-    rellenar(direc, cont)    
        
 def p_G(p):
     '''
@@ -221,7 +194,7 @@ def p_TA(p):
     TA : TA MULT FA
        | TA DIV FA
        | FA AUX       
-    '''  
+    '''   
     global temp
     if p[2] == '*' or p[2] == '/':
        if len(pila_operandos) >= 2:
@@ -332,22 +305,87 @@ def p_H(p):
                 pila_operandos.append(p[1])      # Preguntar a maestra si debe ir asi
             else:
                 sys.exit(str(p[1]) + ' no fue definido') 
+                
 
+#----------------- AUXILIARES (sirven para la programación) ---------------
+#--------------Auxiliares del "IF"--------------
+
+def p_AUX1(p):      #Primer auxiliar del "if"
+    '''     
+    AUX1 :
+    '''          
+    te = pila_operandos.pop()
+    cuadr = hacerLista('gotoF', te)
+    cuadruplos.append(cuadr)
+    pila_saltos.append(cont - 1)
+    
+def p_AUX2(p):        #Segundo auxiliar del "if"
+    '''     
+    AUX2 :
+    '''          
+    direc = pila_saltos.pop()
+    cuadr = hacerLista('goto')
+    cuadruplos.append(cuadr)
+    pila_saltos.append(cont - 1)
+    rellenar(direc, cont)     
+    
+def p_AUX3(p):        #Tercer auxiliar del "if"
+    '''     
+    AUX3 :
+    '''          
+    direc = pila_saltos.pop()
+    rellenar(direc, cont)    
+    
+#--------------Auxiliares del "WHILE" y "DO WHILE"--------------
+
+def p_AUX4(p):        #Primer auxiliar del "while" y "do while"
+    '''     
+    AUX4 :
+    '''          
+    pila_saltos.append(cont)    
+
+def p_AUX5(p):        #Segundo auxiliar del "while"
+    '''     
+    AUX5 :
+    '''         
+    tr = pila_operandos.pop()
+    cuadr = hacerLista('gotoF', tr)
+    cuadruplos.append(cuadr)
+    pila_saltos.append(cont - 1)
+
+def p_AUX6(p):        #Tercer auxiliar del "while"
+    '''     
+    AUX6 :
+    '''           
+    dir1 = pila_saltos.pop()
+    dir2 = pila_saltos.pop()
+    cuadr = hacerLista('goto', dir2)
+    cuadruplos.append(cuadr)
+    rellenar(dir1, cont)
+
+def p_AUX7(p):        #Segundo auxiliar del " do while"
+    '''     
+    AUX7 :
+    '''          
+    cuadr = hacerLista('gotoF', pila_operandos.pop(), pila_saltos.pop())
+    cuadruplos.append(cuadr)
             
 def p_AUX(p):
     '''     
     AUX :
     '''  
+
     
 def p_error(p):
     print("\tINCORRECTO")
 
-# Se crea el parser 
+#--------------- Se crea el parser -------------------------
 parser = yacc.yacc()
 
-
+#--------------- Pruebas con diferentes archivos ------------
 try:
-    f = open("ifprueba.txt", "r")
+    f = open("prueba_ciclos.txt", "r")
+    #f = open("prueba_while.txt", "r")
     #f = open("prueba_cuadruplos2.txt", "r")
     #f = open("prueba_variables.txt", "r")
     #f = open("matricesEntrega_A01244818.txt", "r")
@@ -358,6 +396,7 @@ try:
 
 except EOFError:
     PASS
+    
 #------------- PRINTS -----------------------------------
 
 print('---------Tabla de Símbolos------------')    
