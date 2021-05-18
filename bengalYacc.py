@@ -1,9 +1,7 @@
 from bengalLex import *
 import ply.yacc as yacc
 import sys
-
-#Para los stacks
-from collections import deque 
+ 
  
 #---------------------------- Funciones ------------------------------------
 def Avails(num):
@@ -132,7 +130,7 @@ def p_S(p):
       | IF EL THEN AUX1 G ELSE AUX2 G AUX3 END 
       | WHEN AUX4 EL AUX5 DO G AUX6 END
       | DO AUX4 G WHEN EL  AUX7 END
-      | FOR ID LINK EA TO EA DO G END
+      | FOR AUX8 LINK EA AUX9 TO EA AUX10 DO G AUX11 END
       | GO '#' ID
       | GOSUB ID
       | EA
@@ -369,7 +367,54 @@ def p_AUX7(p):        #Segundo auxiliar del " do while"
     '''          
     cuadr = hacerLista('gotoF', pila_operandos.pop(), pila_saltos.pop())
     cuadruplos.append(cuadr)
+
+def p_AUX8(p):        #Primer auxiliar del ciclo for
+    '''     
+    AUX8 : ID
+    '''
+    if p[1] != None:
+        if p[1] in tabla_simbolos.keys():
+            pila_operandos.append(p[1])
+        else:
+            sys.exit(str(p[1]) + ' no fue definido') 
             
+def p_AUX9(p):        #Segundo auxiliar del ciclo for
+    '''     
+    AUX9 : 
+    '''
+    exp1 = pila_operandos.pop()
+    id1 =  pila_operandos[-1]     
+    cuadr = hacerLista('=', exp1, id1)
+    cuadruplos.append(cuadr)       
+            
+def p_AUX10(p):        #Tercer auxiliar del ciclo for
+    '''     
+    AUX10 : 
+    '''
+    global tf
+    tf = avail.pop(0)
+    exp2 = pila_operandos.pop()
+    tx = avail.pop(0) 
+    id2 =  pila_operandos[-1]     
+    cuadruplos.append(hacerLista('<=', exp2+1, tf))  #le sume uno para cuando sea el ciclo, usar el "<" como menor (a es menor a 4 (va a iterar hasta 3))
+    cuadruplos.append(hacerLista('<', id2, tf,tx)) 
+    cuadruplos.append(hacerLista('gotoF', tx)) 
+    avail.insert(0, tx)
+    pila_saltos.append(cont-2)
+
+def p_AUX11(p):        #Tercer auxiliar del ciclo for
+    '''     
+    AUX11 : 
+    '''
+    
+    id3 = pila_operandos.pop()
+    cuadruplos.append(hacerLista('+', id3, 1, id3)) 
+    retorno = pila_saltos.pop()
+    cuadruplos.append(hacerLista('goto', retorno)) 
+    rellenar(retorno+1, cont)
+    avail.insert(0, tf)
+    
+    
 def p_AUX(p):
     '''     
     AUX :
@@ -384,7 +429,7 @@ parser = yacc.yacc()
 
 #--------------- Pruebas con diferentes archivos ------------
 try:
-    f = open("prueba_ciclos.txt", "r")
+    f = open("prueba_for.txt", "r")
     #f = open("prueba_while.txt", "r")
     #f = open("prueba_cuadruplos2.txt", "r")
     #f = open("prueba_variables.txt", "r")
