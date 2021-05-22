@@ -35,48 +35,66 @@ def rellenar(direc, cont):
 def guardar(valor, variab):  
      for idx,item in enumerate(simbolos):
          if variab in item[0]:
-             simbolos[idx].append(valor) 
-          
-     for idx2,item2 in enumerate(tabla_temporales):
-         if variab in item2[0]:
-             tabla_temporales[idx2].append(valor)
-#-------------------------------------------------------
+             if len(item) == 3:
+                 item.pop()
+                 item.append(str(valor))
+             else:
+                 item.append(str(valor))
+              
 def recuperar(variab): 
-    for idx,item in enumerate(simbolos):
-        if variab in item[0]:
-            vl = simbolos[idx][2]
-            return vl
+    try:
+        float(variab)
+        vl = variab
+        return vl
+    except ValueError:
+        for list in simbolos:
+            if list[0] == variab:
+                vl = list[2]
+                return vl
 
-         
-    for idx2,item2 in enumerate(tabla_temporales):
-        if variab in item2[0]:
-            vl = tabla_temporales[idx2][1]
-            return vl
-        else:
-            return variab 
- 
+def printB(variable):
+    bandera = False
+    try: 
+        float(variable)
+        vl = variable
+        print(vl) 
+    except ValueError:
+        for list in simbolos:
+            if list[0] == variable:
+                vl = list[2]
+                print(vl) 
+                bandera = False
+                break
+            else:
+                bandera = True
+    if bandera == True:
+        print(variable)
+        bandera = False 
+
 #----------------------------- VARIABLES ----------------------------------
 simbolos = []
-#tabla_temporales = []
 tabla_temporales = [[] for i in range(10)]
 
 nombre_var = []
 tipo_var = ""
 variable = ""
 varOutput =""
-space = ""
+space = " "
  
 pila_operandos = []
 pila_saltos = []
 cont = 0
 dirSim = 0
-
 temp = ''
 avail = Avails(10)
-for ind,x in enumerate(avail): 
+
+for ind,x in enumerate(avail):         # Se hace una lista de listas para la tabla de temporales
    tabla_temporales[ind].append(x)
+   tabla_temporales[ind].append('temp')
 
-
+for y in tabla_temporales:             #Junto la tabla de simo
+    simbolos.append(y)
+    
 cuadruplos = []        #Lista de listas de cuadruplos
 
 #--------------------------------------------------------------------------
@@ -115,7 +133,7 @@ def p_B(p):
       | ID 
     ''' 
     global nombre_var 
-    left_text = p[1].partition("[")[0]
+    left_text = p[1].partition("[")[0] 
     nombre_var.append(left_text)
 
 def p_C(p):  
@@ -197,9 +215,12 @@ def p_K(p):
       | CTE
       | ID
     '''
-    global varOutput
+    global varOutput 
     global space
-    varOutput = varOutput + space + p[1]
+    if p[1] != None:
+        varOutput = varOutput + space + str(p[1])
+    elif p[1] == None:
+        varOutput = varOutput + space + str(p[2])
          
 def p_var(p):
     '''
@@ -265,6 +286,8 @@ def p_FA(p):
             pila_operandos.append(p[1])
         else:
             if isinstance(p[1], int) == True:
+                pila_operandos.append(p[1])
+            elif isinstance(p[1], float) == True:
                 pila_operandos.append(p[1])
             else:
                 sys.exit(str(p[1]) + ' no fue definido')
@@ -347,6 +370,8 @@ def p_H(p):
             pila_operandos.append(p[1])
         else:
             if isinstance(p[1], int) == True:
+                pila_operandos.append(p[1])
+            elif isinstance(p[1], float) == True:
                 pila_operandos.append(p[1])
             else:
                 sys.exit(str(p[1]) + ' no fue definido')
@@ -517,8 +542,8 @@ parser = yacc.yacc()
 
 #--------------- Pruebas con diferentes archivos ------------
 try:
-    f = open("prueba_if.txt", "r")
-    #f = open("prueba_for.txt", "r")
+    #f = open("ejecutor1.txt", "r")
+    f = open("prueba_for.txt", "r")
     #f = open("prueba_cuadruplos2.txt", "r")
     #f = open("prueba_variables.txt", "r")
     #f = open("matricesEntrega_A01244818.txt", "r")
@@ -530,31 +555,34 @@ try:
 except EOFError:
     PASS
     
- 
+# =============================================================================
+# x = recuperar('hj')
+# print(x)
+# =============================================================================
 
 #------------- PRINTS -----------------------------------
 
-#---------------------------------------------------------------
-print('----------Tabla de simbolos-------')
-for sim in enumerate(simbolos):
-    print(*sim)
-
-print('----------Tabla de temporales-------')
-for temp in enumerate(tabla_temporales):
-    print(*temp)    
-
-print('\n--------Código Intermedio ----------')
-for s in cuadruplos:
-    print(s)  #cuadruplos es una lista de listas. Con el * se itera en cada lista e imprime los valores de cada lista sin corchetes ni comas
-    #print(s)   #Formato de listas
+# =============================================================================
+# #---------------------------------------------------------------
+# print('----------Tabla de simbolos-------')
+# for sim in enumerate(simbolos):
+#     print(*sim)
+# 
+# print('\n--------Código Intermedio ----------')
+# for s in cuadruplos:
+#     print(s)  #cuadruplos es una lista de listas. Con el * se itera en cada lista e imprime los valores de cada lista sin corchetes ni comas
+#     #print(s)   #Formato de listas
+# =============================================================================
     
-    
-print('\n----------Pilas------------')    
-print("Avails:", avail)
-print("pila operandos:", pila_operandos)
-print("pila saltos:", pila_saltos)
-print("Contador:", cont)
-print("Direcciones:", dirSim)
-#---------------------------------------------
+# =============================================================================
+#     
+# print('\n----------Pilas------------')    
+# print("Avails:", avail)
+# print("pila operandos:", pila_operandos)
+# print("pila saltos:", pila_saltos)
+# print("Contador:", cont)
+# print("Direcciones:", dirSim)
+# #---------------------------------------------
+# =============================================================================
 
 
