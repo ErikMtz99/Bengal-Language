@@ -1,5 +1,4 @@
 import ply.lex as lex
-import sys
 
 reserved = {
     'start': 'START',
@@ -43,7 +42,6 @@ tokens = [      #Todos los tokens que se vayan a usar
     'DERCORCH',
     'LINK',
     'COMA',
-    'COMMENT',
     
     'EQUAL',
     'NOTEQUAL',
@@ -66,12 +64,19 @@ def t_ID(t):
     r'[a-zA-Z_][a-zA-Z_\d\[\]]*'
     t.type = reserved.get(t.value,'ID')    # Check for reserved words
     return t
-
+ 
 def t_CTE(t):
-        r'\d+'
-        t.value = int(t.value)    
+        r'\d+\.*\d*'
+        #r'\d+
+        t.value = float(t.value)    
         return t 
-    
+
+# =============================================================================
+# def t_CTE_FL(t):
+#     r'\d+\.\d+'
+#     t.value = float(t.value)
+#     return t    
+# =============================================================================
 #Expresiones Regulares para tokens simples
 t_SUMA    = r'\+'
 t_RESTA   = r'-'
@@ -100,11 +105,6 @@ def t_newline(t):
 def t_error(t):
     print("Illegal characters!")
     t.lexer.skip(1)
-    
-def testLexer():
-    lexer.input(testProgram)
-    for tok in lexer:
-        print(tok)
         
 # Se crea el lexer 
 lexer = lex.lex()
