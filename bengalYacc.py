@@ -20,21 +20,63 @@ def hacerLista(*elementos):
     cont = cont + 1
     return lista
 
-def rellenar(direc, cont):
-    cuadruplos[direc].append(cont)
+def tablaSim(*elementos):
+    lst = []
+    for k in elementos:
+        lst.append(k)
+    global dirSim
+    dirSim = dirSim + 1
+    return lst
 
+def rellenar(direc, cont): 
+    cuadruplos[direc].append(str(cont))
+
+#-------------------------------------------------------     
+def guardar(valor, variab):  
+     for idx,item in enumerate(simbolos):
+         if variab in item[0]:
+             simbolos[idx].append(valor) 
+          
+     for idx2,item2 in enumerate(tabla_temporales):
+         if variab in item2[0]:
+             tabla_temporales[idx2].append(valor)
+#-------------------------------------------------------
+def recuperar(variab): 
+    for idx,item in enumerate(simbolos):
+        if variab in item[0]:
+            vl = simbolos[idx][2]
+            return vl
+
+         
+    for idx2,item2 in enumerate(tabla_temporales):
+        if variab in item2[0]:
+            vl = tabla_temporales[idx2][1]
+            return vl
+        else:
+            return variab 
+ 
 #----------------------------- VARIABLES ----------------------------------
-tabla_simbolos = {}
+simbolos = []
+#tabla_temporales = []
+tabla_temporales = [[] for i in range(10)]
+
 nombre_var = []
 tipo_var = ""
 variable = ""
-
+varOutput =""
+space = ""
+ 
 pila_operandos = []
 pila_saltos = []
 cont = 0
+dirSim = 0
 
 temp = ''
-avail = Avails(11)
+avail = Avails(10)
+for ind,x in enumerate(avail): 
+   tabla_temporales[ind].append(x)
+
+
 cuadruplos = []        #Lista de listas de cuadruplos
 
 #--------------------------------------------------------------------------
@@ -42,7 +84,7 @@ cuadruplos = []        #Lista de listas de cuadruplos
 #-----------------------Definición del programa principal-------------------
 def p_programa(p):
     '''
-    programa : START variables procedures main END 
+    programa : START A1 variables procedures A2 main END A3 
     '''
     print("\tCORRECTO")
 
@@ -63,7 +105,7 @@ def p_A(p):
     for t in p:
         if t ==';':
             for x in nombre_var:
-               tabla_simbolos.update({x : tipo_var})
+               simbolos.append(tablaSim(x, tipo_var)) 
                nombre_var.clear()
                tipo_var = ""
              
@@ -124,9 +166,9 @@ def p_F(p):
 def p_S(p):
     '''
     S : var LINK EA 
-      | INPUT var 
-      | OUTPUT IZQPAR K DERPAR
-      | OUTPUT var
+      | INPUT var AUX14
+      | OUTPUT IZQPAR K DERPAR AUX12
+      | OUTPUT var AUX13
       | IF EL THEN AUX1 G ELSE AUX2 G AUX3 END 
       | WHEN AUX4 EL AUX5 DO G AUX6 END
       | DO AUX4 G WHEN EL  AUX7 END
@@ -140,9 +182,9 @@ def p_S(p):
     if  p[2] == '<=':
         if len(pila_operandos) >= 1:
             operando1 = pila_operandos.pop()
-            cuadr = hacerLista('=', variable, operando1)
+            cuadr = hacerLista('=', str(operando1), variable)
             cuadruplos.append(cuadr)
-       
+    
 def p_G(p):
     '''
     G : G S ';'
@@ -154,7 +196,11 @@ def p_K(p):
       | K CTE
       | CTE
       | ID
-    '''     
+    '''
+    global varOutput
+    global space
+    varOutput = varOutput + space + p[1]
+         
 def p_var(p):
     '''
     var : ID 
@@ -184,7 +230,7 @@ def p_EA(p):
             if operando2 == temp:
                avail.insert(0, operando2)
             temp = avail.pop(0)
-            cuadr = hacerLista(p[2], operando1, operando2, temp)
+            cuadr = hacerLista(p[2], str(operando1), str(operando2), temp)
             cuadruplos.append(cuadr)
             pila_operandos.append(temp)
 def p_TA(p):
@@ -203,7 +249,7 @@ def p_TA(p):
             if operando2 == temp:
                avail.insert(0, operando2)
             temp = avail.pop(0)
-            cuadr = hacerLista(p[2], operando1, operando2, temp)
+            cuadr = hacerLista(p[2], str(operando1), str(operando2), temp)
             cuadruplos.append(cuadr)
             pila_operandos.append(temp)
     
@@ -215,16 +261,20 @@ def p_FA(p):
     '''    
     global pila_operandos
     if p[1] != '(' and p[1] != None:
-        if p[1] in tabla_simbolos.keys():
+        if p[1] in (item[0] for item in simbolos):
             pila_operandos.append(p[1])
         else:
             if isinstance(p[1], int) == True:
-                pila_operandos.append(p[1])      # Preguntar a maestra si debe ir asi
+                pila_operandos.append(p[1])
             else:
-                sys.exit(str(p[1]) + ' no fue definido')     
+                sys.exit(str(p[1]) + ' no fue definido')
+                
+def p_AUX(p):
+    '''     
+    AUX :
+    '''  
 
-      
-        
+                  
 #Expresiones Logicas      
 def p_EL(p):
     '''
@@ -242,11 +292,11 @@ def p_EL(p):
             if operando2 == temp:
                avail.insert(0, operando2)
             temp = avail.pop(0)
-            cuadr = hacerLista(p[2], operando1, operando2, temp)
+            cuadr = hacerLista(p[2], str(operando1), str(operando2), temp)
             cuadruplos.append(cuadr)
             pila_operandos.append(temp)
    
-            
+             
 def p_TL(p):
     '''        
     TL : TL NOT FL
@@ -255,14 +305,11 @@ def p_TL(p):
     global temp
     if p[2] == 'not':
        if len(pila_operandos) >= 2:
-            operando2 = pila_operandos.pop()
             operando1 = pila_operandos.pop()
             if operando1 == temp: 
                avail.insert(0, operando1)
-            if operando2 == temp:
-               avail.insert(0, operando2)
             temp = avail.pop(0)
-            cuadr = hacerLista(p[2], operando1, operando2, temp)
+            cuadr = hacerLista(p[2], str(operando1), temp)
             cuadruplos.append(cuadr)
             pila_operandos.append(temp)
     
@@ -284,7 +331,7 @@ def p_FL(p):
             if operando2 == temp:
                avail.insert(0, operando2)
             temp = avail.pop(0)
-            cuadr = hacerLista(p[2], operando1, operando2, temp)
+            cuadr = hacerLista(p[2], str(operando1), str(operando2), temp)
             cuadruplos.append(cuadr)
             pila_operandos.append(temp)
         
@@ -295,17 +342,19 @@ def p_H(p):
       | CTE
     '''  
     global pila_operandos
-    if p[1] != None:
-        if p[1] in tabla_simbolos.keys():
+    if p[1] != '(' and p[1] != None:
+        if p[1] in (item[0] for item in simbolos):
             pila_operandos.append(p[1])
         else:
             if isinstance(p[1], int) == True:
-                pila_operandos.append(p[1])      # Preguntar a maestra si debe ir asi
+                pila_operandos.append(p[1])
             else:
-                sys.exit(str(p[1]) + ' no fue definido') 
+                sys.exit(str(p[1]) + ' no fue definido')
                 
+   
 
 #----------------- AUXILIARES (sirven para la programación) ---------------
+
 #--------------Auxiliares del "IF"--------------
 
 def p_AUX1(p):      #Primer auxiliar del "if"
@@ -357,7 +406,7 @@ def p_AUX6(p):        #Tercer auxiliar del "while"
     '''           
     dir1 = pila_saltos.pop()
     dir2 = pila_saltos.pop()
-    cuadr = hacerLista('goto', dir2)
+    cuadr = hacerLista('goto', str(dir2))
     cuadruplos.append(cuadr)
     rellenar(dir1, cont)
 
@@ -365,18 +414,21 @@ def p_AUX7(p):        #Segundo auxiliar del " do while"
     '''     
     AUX7 :
     '''          
-    cuadr = hacerLista('gotoF', pila_operandos.pop(), pila_saltos.pop())
+    cuadr = hacerLista('gotoF', str(pila_operandos.pop()), str(pila_saltos.pop()))
     cuadruplos.append(cuadr)
 
+
+#-------------------- Auxiliares del ciclo for -------------------------------
 def p_AUX8(p):        #Primer auxiliar del ciclo for
     '''     
     AUX8 : ID
     '''
     if p[1] != None:
-        if p[1] in tabla_simbolos.keys():
+        if p[1] in (item[0] for item in simbolos):
             pila_operandos.append(p[1])
         else:
-            sys.exit(str(p[1]) + ' no fue definido') 
+            sys.exit(str(p[1]) + ' no fue definido')
+                
             
 def p_AUX9(p):        #Segundo auxiliar del ciclo for
     '''     
@@ -384,7 +436,7 @@ def p_AUX9(p):        #Segundo auxiliar del ciclo for
     '''
     exp1 = pila_operandos.pop()
     id1 =  pila_operandos[-1]     
-    cuadr = hacerLista('=', exp1, id1)
+    cuadr = hacerLista('=', str(exp1), id1)
     cuadruplos.append(cuadr)       
             
 def p_AUX10(p):        #Tercer auxiliar del ciclo for
@@ -396,7 +448,7 @@ def p_AUX10(p):        #Tercer auxiliar del ciclo for
     exp2 = pila_operandos.pop()
     tx = avail.pop(0) 
     id2 =  pila_operandos[-1]     
-    cuadruplos.append(hacerLista('<=', exp2+1, tf))  #le sume uno para cuando sea el ciclo, usar el "<" como menor (a es menor a 4 (va a iterar hasta 3))
+    cuadruplos.append(hacerLista('=', str(exp2+1), tf))  #le sume uno para cuando sea el ciclo, usar el "<" como menor (a es menor a 4 (va a iterar hasta 3))
     cuadruplos.append(hacerLista('<', id2, tf,tx)) 
     cuadruplos.append(hacerLista('gotoF', tx)) 
     avail.insert(0, tx)
@@ -408,19 +460,55 @@ def p_AUX11(p):        #Tercer auxiliar del ciclo for
     '''
     
     id3 = pila_operandos.pop()
-    cuadruplos.append(hacerLista('+', id3, 1, id3)) 
+    cuadruplos.append(hacerLista('+', id3, str(1), id3)) 
     retorno = pila_saltos.pop()
-    cuadruplos.append(hacerLista('goto', retorno)) 
+    cuadruplos.append(hacerLista('goto', str(retorno))) 
     rellenar(retorno+1, cont)
     avail.insert(0, tf)
     
-    
-def p_AUX(p):
+#------------------------ Auxiliares del INPUT y OUPTUT -----------------------------
+def p_AUX12(p):        # 1er Auxiliar del Output
     '''     
-    AUX :
-    '''  
-
+    AUX12 : 
+    '''
+    cuadruplos.append(hacerLista('output', varOutput))
     
+def p_AUX13(p):        # 2ndo Auxiliar del Output
+    '''     
+    AUX13 : 
+    '''    
+    cuadruplos.append(hacerLista('output', variable))
+
+def p_AUX14(p):        # Auxiliar del Input
+    '''     
+    AUX14 : 
+    '''    
+    if variable in (item[0] for item in simbolos):
+        cuadruplos.append(hacerLista('input', variable))
+    else:
+        sys.exit(variable + ' no fue definido')   
+    
+
+#------------------------ Auxiliares del main program -----------------------------
+def p_A1(p):        # 1er Auxiliar del Main
+    '''     
+    A1 : 
+    '''
+    cuadruplos.append(hacerLista('goto'))
+
+def p_A2(p):        # 2ndo Auxiliar del Main
+    '''     
+    A2 : 
+    '''
+    rellenar(0, cont)
+
+def p_A3(p):        # 3er Auxiliar del Main
+    '''     
+    A3 : 
+    '''
+    cuadruplos.append(hacerLista('finPrograma'))
+
+
 def p_error(p):
     print("\tINCORRECTO")
 
@@ -429,8 +517,8 @@ parser = yacc.yacc()
 
 #--------------- Pruebas con diferentes archivos ------------
 try:
-    f = open("prueba_for.txt", "r")
-    #f = open("prueba_while.txt", "r")
+    f = open("prueba_if.txt", "r")
+    #f = open("prueba_for.txt", "r")
     #f = open("prueba_cuadruplos2.txt", "r")
     #f = open("prueba_variables.txt", "r")
     #f = open("matricesEntrega_A01244818.txt", "r")
@@ -442,23 +530,31 @@ try:
 except EOFError:
     PASS
     
+ 
+
 #------------- PRINTS -----------------------------------
 
-print('---------Tabla de Símbolos------------')    
-print("\n".join("{}\t{}\t{}".format(i, k, v) for i, (k, v) in enumerate(tabla_simbolos.items())))
+#---------------------------------------------------------------
+print('----------Tabla de simbolos-------')
+for sim in enumerate(simbolos):
+    print(*sim)
+
+print('----------Tabla de temporales-------')
+for temp in enumerate(tabla_temporales):
+    print(*temp)    
 
 print('\n--------Código Intermedio ----------')
 for s in cuadruplos:
-    print(*s)  #cuadruplos es una lista de listas. Con el * se itera en cada lista e imprime los valores de cada lista sin corchetes ni comas
-
+    print(s)  #cuadruplos es una lista de listas. Con el * se itera en cada lista e imprime los valores de cada lista sin corchetes ni comas
+    #print(s)   #Formato de listas
     
-print('\n--------Cuadruplos (listas) ----------')
-for s in cuadruplos:
-    print(s)
     
 print('\n----------Pilas------------')    
 print("Avails:", avail)
 print("pila operandos:", pila_operandos)
 print("pila saltos:", pila_saltos)
 print("Contador:", cont)
+print("Direcciones:", dirSim)
 #---------------------------------------------
+
+
