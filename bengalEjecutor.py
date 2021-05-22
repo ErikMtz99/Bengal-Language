@@ -1,4 +1,4 @@
-from bengalYacc import (tabla_temporales, simbolos, cuadruplos, recuperar, guardar) 
+from bengalYacc import (tabla_temporales, simbolos, cuadruplos, recuperar, guardar, printB) 
 
 
 pc = 0 #Program Counter
@@ -12,25 +12,28 @@ while(True):
         v = recuperar(c[1])
         guardar(v,c[2])
         pc = pc + 1
-
+ 
     if opcode == '+':
-        va = recuperar(c[1])  
-        vb = recuperar(c[2])  
-        resultado = int(va) + int(vb)  
+        va = recuperar(c[1])   
+        vb = recuperar(c[2])
+        #print(va)
+       # print(vb)
+        resultado = float(va) + float(vb) 
+        #print(resultado)
         guardar(resultado,c[3])
         pc = pc + 1
         
     if opcode == '-':
         va = recuperar(c[1])
         vb = recuperar(c[2])
-        resultado = int(va) - int(vb)  
+        resultado = float(va) - float(vb)  
         guardar(resultado,c[3])
         pc = pc + 1
         
     if opcode == '*':
         va = recuperar(c[1])
         vb = recuperar(c[2])
-        resultado = int(va) * int(vb)  
+        resultado = float(va) * float(vb)  
         guardar(resultado,c[3])
         pc = pc + 1
         
@@ -71,49 +74,53 @@ while(True):
         pc = pc + 1
         
     if opcode == '<':
-        va = recuperar(c[1])
-        vb = recuperar(c[2])
-        if va < vb == True:
+        va = float(recuperar(c[1]))
+        vb = float(recuperar(c[2]))
+        if (va < vb) == True:
             resultado = True
+            guardar(resultado,c[3])
         else:
             resultado = False
-        guardar(resultado,c[3])
+            guardar(resultado,c[3])
         pc = pc + 1
         
     if opcode == '>':
-        va = recuperar(c[1])
-        vb = recuperar(c[2])
-        if va > vb == True:
+        va = float(recuperar(c[1]))
+        vb = float(recuperar(c[2]))
+        if (va > vb) == True:
             resultado = True
+            guardar(resultado,c[3])
         else:
             resultado = False
-        guardar(resultado,c[3])
+            guardar(resultado,c[3])
         pc = pc + 1
         
     if opcode == '==':
-        va = recuperar(c[1])
-        vb = recuperar(c[2])
-        if va == vb == True:
+        va = float(recuperar(c[1]))
+        vb = float(recuperar(c[2]))
+        if (va == vb) == True:
             resultado = True
+            guardar(resultado,c[3])
         else:
             resultado = False
-        guardar(resultado,c[3])
+            guardar(resultado,c[3])
         pc = pc + 1
         
     if opcode == '!=':
-        va = recuperar(c[1])
-        vb = recuperar(c[2])
-        if va != vb == True:
+        va = float(recuperar(c[1]))
+        vb = float(recuperar(c[2]))
+        if (va != vb) == True:
             resultado = True
+            guardar(resultado,c[3])
         else:
             resultado = False
-        guardar(resultado,c[3])
+            guardar(resultado,c[3])
         pc = pc + 1
         
     if opcode == 'gotoF':
         va = recuperar(c[1])
-        if va == False:
-            pc = int(c[2])
+        if va == 'False':
+            pc = int(c[2]) 
         else:
             pc = pc + 1
             
@@ -121,9 +128,9 @@ while(True):
         pc = int(c[1])
         
     if opcode == 'output':
-        va = str(recuperar(c[1]))
-        print(va)
+        printB(c[1])  
         pc = pc + 1
+        
     if opcode == 'input':
         entrada = input()
         guardar(entrada,c[1])
@@ -141,8 +148,4 @@ print('----------Tabla de simbolos-------')
 for sim in enumerate(simbolos):
     print(*sim)
 
-print('----------Tabla de temporales-------')
-for temp in enumerate(tabla_temporales):
-    print(*temp) 
-    
 
