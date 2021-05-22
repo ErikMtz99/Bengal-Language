@@ -37,9 +37,6 @@ def guardar(valor, variab):
          if variab in item[0]:
              simbolos[idx].append(valor) 
           
-     for idx2,item2 in enumerate(tabla_temporales):
-         if variab in item2[0]:
-             tabla_temporales[idx2].append(valor)
 #-------------------------------------------------------
 def recuperar(variab): 
     for idx,item in enumerate(simbolos):
@@ -47,17 +44,10 @@ def recuperar(variab):
             vl = simbolos[idx][2]
             return vl
 
-         
-    for idx2,item2 in enumerate(tabla_temporales):
-        if variab in item2[0]:
-            vl = tabla_temporales[idx2][1]
-            return vl
-        else:
-            return variab 
+
  
 #----------------------------- VARIABLES ----------------------------------
 simbolos = []
-#tabla_temporales = []
 tabla_temporales = [[] for i in range(10)]
 
 nombre_var = []
@@ -70,13 +60,16 @@ pila_operandos = []
 pila_saltos = []
 cont = 0
 dirSim = 0
-
 temp = ''
 avail = Avails(10)
-for ind,x in enumerate(avail): 
+
+for ind,x in enumerate(avail):         # Se hace una lista de listas para la tabla de temporales
    tabla_temporales[ind].append(x)
+   tabla_temporales[ind].append('temp')
 
-
+for y in tabla_temporales:             #Junto la tabla de simo
+    simbolos.append(y)
+    
 cuadruplos = []        #Lista de listas de cuadruplos
 
 #--------------------------------------------------------------------------
@@ -515,9 +508,12 @@ def p_error(p):
 #--------------- Se crea el parser -------------------------
 parser = yacc.yacc()
 
+
+
+
 #--------------- Pruebas con diferentes archivos ------------
 try:
-    f = open("prueba_if.txt", "r")
+    f = open("ejecutor1.txt", "r")
     #f = open("prueba_for.txt", "r")
     #f = open("prueba_cuadruplos2.txt", "r")
     #f = open("prueba_variables.txt", "r")
@@ -531,7 +527,6 @@ except EOFError:
     PASS
     
  
-
 #------------- PRINTS -----------------------------------
 
 #---------------------------------------------------------------
