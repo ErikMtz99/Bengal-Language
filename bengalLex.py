@@ -31,6 +31,7 @@ reserved = {
 tokens = [      #Todos los tokens que se vayan a usar
     'ID',
     'CTE',
+    'SIM',
 
     'SUMA',
     'RESTA',
@@ -46,7 +47,9 @@ tokens = [      #Todos los tokens que se vayan a usar
     'EQUAL',
     'NOTEQUAL',
     'MAYOR',
-    'MENOR'
+    'MENOR',
+    'MAYOR_IGUAL',
+    'MENOR_IGUAL'
         
 ] + list(reserved.values())
 
@@ -61,10 +64,15 @@ t_ignore_tabs = r'\t'
 t_ignore_COMMENT = r'\//.*'
  
 def t_ID(t):
-    r'[a-zA-Z_][a-zA-Z_\d\[\]]*'
+    r'[a-zA-Z_][a-zA-Z_\d\\]*'
     t.type = reserved.get(t.value,'ID')    # Check for reserved words
     return t
- 
+
+def t_SIM(t):
+    r'[a-zA-Z_\_\:][a-zA-Z_\d\_\[\]]*'
+    t.type = reserved.get(t.value,'ID')    # Check for reserved words
+    return t
+    
 def t_CTE(t):
         r'\d+\.*\d*'
         #r'\d+
@@ -94,6 +102,8 @@ t_EQUAL = r'\=\='
 t_NOTEQUAL = r'\!\='
 t_MAYOR = r'\>'
 t_MENOR = r'\<'
+t_MENOR_IGUAL = r'\=\<'
+t_MAYOR_IGUAL = r'\=\>'
  
  
 # Define a rule so we can track line numbers
